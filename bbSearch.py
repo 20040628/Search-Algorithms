@@ -339,6 +339,35 @@ class SearchQueue:
 
 
 import time, random
+# clever_search1 用这个
+# def compute_goal_positions(goal_state):
+#     goal_position = {}
+#     for r, row in enumerate(goal_state.blockstate):
+#         for c, col in enumerate(row):
+#             if col != 0:
+#                 goal_position[col] = (r, c)  # 记录每个方块的目标坐标
+#     return goal_position
+
+def compute_goal_positions(goal_state):
+    goal_anchors = {}
+    block_positions = {}
+
+    for r, row in enumerate(goal_state.blockstate):
+        for c, col in enumerate(row):
+            if col != 0:
+                if col not in block_positions:
+                    block_positions[col] = []
+                block_positions[col].append((r, c))
+
+    for block, positions in block_positions.items():
+        # 左上角为锚点
+        r_min, c_min = min(positions)
+        # 几何中心为锚点
+        r_avg = sum(p[0] for p in positions) // len(positions)
+        c_avg = sum(p[1] for p in positions) // len(positions)
+        goal_anchors[block] = (r_min, c_min)  # 或者使用几何中心
+
+    return goal_anchors
 
 
 def search(problem,
@@ -368,7 +397,8 @@ def search(problem,
     queue = SearchQueue(mode, cost, heuristic)
     queue.initialise([([], problem.initial_state)], weights=[0])
     global weight_function
-    weight_function = node_weight_function(cost, heuristic, problem.goal)
+    goal = compute_goal_positions(problem.goal)
+    weight_function = node_weight_function(cost, heuristic, goal)
 
     states_seen = {problem.initial_state.__repr__()}
     nodes_generated = 1  # counting initial state
@@ -515,15 +545,15 @@ def search(problem,
         }
 
 
-def node_weight_function(cost, heuristic, goal_state=None):
+def node_weight_function(cost, heuristic, goal_position=None):
     if not cost and not heuristic:
         return lambda p, s: None
     if cost and (not heuristic):
         return cost
     if (not cost) and heuristic:
-        return lambda p, s: (heuristic(s, goal_state))
+        return lambda p, s: heuristic(s, goal_position)if goal_position is not None else float('inf')
     if cost and heuristic:
-        return lambda p, s: (cost(p, s) + heuristic(s, goal_state))
+        return lambda p, s: cost(p, s) + heuristic(s, goal_position)if goal_position is not None else float('inf')
 
 
 # In[46]:
