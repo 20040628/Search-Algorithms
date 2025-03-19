@@ -65,6 +65,7 @@ class SearchProblem:
         initial state and/or other aspects of a problem instance.
         """
         self.initial_state = None
+        # self.goal = None
         raise NotImplementedError
 
     def info(self):
@@ -367,7 +368,7 @@ def search(problem,
     queue = SearchQueue(mode, cost, heuristic)
     queue.initialise([([], problem.initial_state)], weights=[0])
     global weight_function
-    weight_function = node_weight_function(cost, heuristic)
+    weight_function = node_weight_function(cost, heuristic, problem.goal)
 
     states_seen = {problem.initial_state.__repr__()}
     nodes_generated = 1  # counting initial state
@@ -514,22 +515,22 @@ def search(problem,
         }
 
 
-def node_weight_function(cost, heuristic):
+def node_weight_function(cost, heuristic, goal_state=None):
     if not cost and not heuristic:
         return lambda p, s: None
     if cost and (not heuristic):
         return cost
     if (not cost) and heuristic:
-        return lambda p, s: (heuristic(s))
+        return lambda p, s: (heuristic(s, goal_state))
     if cost and heuristic:
-        return lambda p, s: (cost(p, s) + heuristic(s))
+        return lambda p, s: (cost(p, s) + heuristic(s, goal_state))
 
 
 # In[46]:
 
 
 def thecost(p, s):
-    return (len(p) ** 2)
+    return (len(p))
 
 
 def test():
