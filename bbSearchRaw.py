@@ -369,7 +369,7 @@ def search( problem,
     queue = SearchQueue(mode,cost,heuristic)
     queue.initialise( [([], problem.initial_state )], weights=[0] )
     global weight_function
-    weight_function = node_weight_function( cost, heuristic )
+    weight_function = node_weight_function( cost, heuristic, problem.goal_item_locations )
     
     states_seen = {problem.initial_state.__repr__()}
     nodes_generated = 1  # counting initial state
@@ -517,15 +517,15 @@ def search( problem,
     
 
 
-def node_weight_function( cost, heuristic ):    
+def node_weight_function( cost, heuristic ,goal_position=None):    
         if not cost and not heuristic:
             return lambda p,s: None
         if cost and (not heuristic):
             return cost
         if (not cost) and heuristic:
-            return lambda p,s: (heuristic(s))
+            return lambda p,s: (heuristic(s,goal_position))
         if cost and heuristic:
-            return lambda p,s:(cost(p,s)+heuristic(s))
+            return lambda p,s:(cost(p,s)+heuristic(s,goal_position))
             
     
 
