@@ -534,7 +534,7 @@ def node_weight_function( cost, heuristic ,goal_position=None):
 
 
 def thecost(p,s):
-    return(len(p)**2)
+    return(len(p))
 
 
 def test():
